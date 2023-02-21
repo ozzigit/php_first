@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.19.3",
+    "prettier": "^3.8.4"
+  },
+  "scripts": {
+    "prettier": "prettier"
+}
+}

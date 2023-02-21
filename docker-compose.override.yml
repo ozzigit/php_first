@@ -3,6 +3,6 @@ services:
     first_php_web:
         ports:
             - "46001:80"
-    first_php_db:
-        ports:
-            - "3306:3306"
+    # first_php_db:
+        # ports:
+            # - "3306:3306"
