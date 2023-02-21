@@ -1,0 +1,77 @@
+version: '3.7'
+services:
+  first_php_web:
+    container_name: first_php-web-container
+    build:
+      context: ./data/docker/web
+      dockerfile: dev/Dockerfile
+      args:
+        HOST_UID: '${HOST_UID}'
+    restart: always
+      #    environment:
+      #      PHP_IDE_CONFIG: serverName=localhost
+    volumes:
+      - '.:/var/www/html'
+      - './data/docker/web/xdebug.log:/tmp/logs/xdebug.log'
+      - './data/docker/web/docker-php-ext-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini'
+    links:
+      - first_php_db
+        #      - first_php_redis
+    depends_on:
+      - first_php_db
+      - first_php_redis
+  first_php_db:
+    container_name: first_php-db-container
+    build:
+      context: ./data/docker/db
+      args:
+        HOST_UID: '${HOST_UID}'
+    restart: always
+    volumes:
+      - './data/volumes/db:/var/lib/mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: php_base
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: secret
+  first_php_redis:
+    container_name: first_php-redis-container
+    restart: always
+    build:
+      context: ./data/docker/redis
+      args:
+        HOST_UID: '${HOST_UID}'
+    volumes:
+      - './data/volumes/redis:/data'
+#  docker_centrifugo:
+#    container_name: docker-centrifugo
+#    image: 'centrifugo/centrifugo:4.0.0'
+#    volumes:
+#      - './config.json:/centrifugo/config.json'
+#    command: centrifugo -c config.json --admin --port=8003
+#    ports:
+#      - '8001:8001'
+#    ulimits:
+#      nofile:
+#        soft: 65535
+#        hard: 65535
+#  docker_elasticsearch:
+#    container_name: fatlama-elasticsearch-container
+#    image: 'docker.elastic.co/elasticsearch/elasticsearch:8.3.3'
+#    restart: always
+#    environment:
+#      - xpack.security.enabled=false
+#      - discovery.type=single-node
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#      nofile:
+#        soft: 65536
+#        hard: 65536
+#    cap_add:
+#      - IPC_LOCK
+#    volumes:
+#      - ./data/volumes/elasticsearch:/data
+#    ports:
+#      - 9200:9200

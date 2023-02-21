@@ -1,0 +1,5 @@
+version: '2'
+services:
+    first_php_web:
+        ports:
+            - "46001:80"
