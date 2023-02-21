@@ -1,4 +1,4 @@
-FROM mariadb:10.6
+FROM mariadb:10.11
 
 ARG HOST_UID=1000
 
