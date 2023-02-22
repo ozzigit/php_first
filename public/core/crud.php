@@ -8,14 +8,13 @@ class Database
 
     private $flag_is_connect = false; // Check to see if the connection is active
     private $conn; //connection itself
-    private $result = []; // Any results from a query will be stored here
+    private $result = []; // Any results or id of a feched  query will be stored here
     private $myQuery = ''; // used for debugging process with SQL return
     private $numResults = 0; // used for returning the number of rows
 
     function __construct()
     {
-        // echo 'this is constructor<br>';
-        echo "<script>console.log('This is constructor' );</script>";
+        // echo "<script>console.log('This is constructor' );</script>";
 
         $table_users = 'users';
         $table_posts = 'posts';
@@ -52,35 +51,27 @@ class Database
 
             //  echo '<br>Connected successfully';
             echo "<script>console.log('Connected successfully' );</script>";
-            try {
-                //check existing needed tables
-                $result = $this->conn
-                    ->query("SELECT 1 FROM {$table_users} LIMIT 1")
-                    ->fetchAll();
-                //  echo isset($result[0]) ? $result[0] : null;
-                //  echo '<br>Table is present in db';
+            if (
+                $this->tableExists($table_users) and
+                $this->tableExists($table_posts)
+            ) {
                 echo "<script>console.log('All tables is present in db' );</script>";
-            } catch (Exception $e) {
-                // We got an exception (table not found)
-                //  echo '<br>No exist table';
-                echo "<script>console.log('No exist table users' );</script>";
-                echo "<script>console.log('Creating table users...' );</script>";
-                $this->conn->query($create_users_table_query)->fetchAll();
-            }
-            try {
-                $result = $this->conn
-                    ->query("SELECT 1 FROM {$table_posts} LIMIT 1")
-                    ->fetchAll();
-            } catch (Exception $e) {
-                echo "<script>console.log('No exist table posts' );</script>";
-                echo "<script>console.log('Creating table posts...' );</script>";
-                $this->conn->query($create_posts_table_query)->fetchAll();
+            } else {
+                if (!$this->tableExists($table_users)) {
+                    echo "<script>console.log('No exist table users' );</script>";
+                    echo "<script>console.log('Creating table users...' );</script>";
+                    $this->conn->query($create_users_table_query)->fetchAll();
+                }
+                if (!$this->tableExists($table_posts)) {
+                    echo "<script>console.log('No exist table posts' );</script>";
+                    echo "<script>console.log('Creating table posts...' );</script>";
+                    $this->conn->query($create_posts_table_query)->fetchAll();
+                }
             }
 
             $this->flag_is_connect = true;
             return true; // Connection has been made return TRUE
         } catch (PDOException $e) {
-            //  echo '<br>Connection failed: ' . $e->getMessage();
             echo "<script>console.log('Connection failed' );</script>";
         }
     }
@@ -88,27 +79,21 @@ class Database
     // Function to disconnect from the database
     function __destruct()
     {
-        // If there is a connection to the database
-        if ($this->flag_is_connect) {
-            // We have found a connection, try to close it
-            // We have successfully closed the connection, set the connection variable to false
-            $this->con = false;
-            $this->connection = null;
-        }
-        // echo 'this is destructor<br>';
-        echo "<script>console.log('This is destructor' );</script>";
+        $this->connection = null;
     }
 
     public function sql($sql)
     {
+        $this->myQuery = $sql; // Pass back the SQL
         try {
-            $query_result = $this->conn->query($sql)->fetchAll();
+            $sth = $this->conn->prepare($sql);
+            // $sth->setFetchMode(PDO::FETCH_ASSOC);
+            $sth->execute();
+            $query_result = $sth->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             $this->result = [];
             return false; // No rows where returned
         }
-        $this->myQuery = $sql; // Pass back the SQL
-        // If the query returns >= 1 assign the number of rows to numResults
         $this->numResults = count($query_result);
         $this->result = $query_result;
         return true; // Query was successful
@@ -124,25 +109,32 @@ class Database
         $limit = null
     ) {
         // Create query from the variables passed to the function
+        $params = [];
         $sql = 'SELECT ' . $rows . ' FROM ' . $table;
         if ($join != null) {
-            $q .= ' JOIN ' . $join;
+            $q .= ' JOIN ?';
+            array_push($params, $join);
         }
         if ($where != null) {
-            $q .= ' WHERE ' . $where;
+            $q .= ' WHERE ?';
+            array_push($params, $where);
         }
         if ($order != null) {
-            $q .= ' ORDER BY ' . $order;
+            $q .= ' ORDER BY ?';
+            array_push($params, $order);
         }
         if ($limit != null) {
-            $q .= ' LIMIT ' . $limit;
+            $q .= ' LIMIT ?';
+            array_push($params, $limit);
         }
         $this->myQuery = $sql; // Pass back the SQL
         // Check to see if the table exists
         if ($this->tableExists($table)) {
             // The table exists, run the query
             try {
-                $query_result = $this->conn->query($sql)->fetchAll();
+                $sth = $this->conn->prepare($sql);
+                $sth->execute($params);
+                $query_result = $sth->fetchAll(PDO::FETCH_ASSOC);
             } catch (Exception $e) {
                 $this->result = [];
                 $this->numResults = 0;
@@ -164,16 +156,23 @@ class Database
         // Check to see if the table exists
         if ($this->tableExists($table)) {
             $sql =
-                'INSERT INTO `' .
-                $table .
-                '` (`' .
-                implode('`, `', array_keys($params)) .
-                '`) VALUES ("' .
-                implode('", "', $params) .
-                '")';
+                "INSERT INTO $table (" .
+                implode(', ', array_keys($params)) .
+                ') VALUES (';
+            $arr_q = [];
+            for ($i = 0; $i < count($params); $i++) {
+                array_push($arr_q, '?');
+            }
+            $sql .= implode(', ', $arr_q) . ')';
             $this->myQuery = $sql; // Pass back the SQL
             try {
-                $query_result = $this->conn->query($sql)->fetchAll();
+                $sth = $this->conn->prepare($sql);
+                $sth->execute(array_values($params));
+                // $query_result = $sth->fetch(PDO::FETCH_ASSOC);
+                $sth = $this->conn->prepare('SELECT LAST_INSERT_ID();');
+                $sth->execute();
+                // i don't now how did this better, write id of result
+                $query_result = $sth->fetch(PDO::FETCH_ASSOC);
             } catch (Exception $e) {
                 $this->result = [];
                 $this->numResults = 0;
@@ -196,19 +195,33 @@ class Database
             if ($where == null) {
                 // $delete = 'DROP TABLE ' . $table; // Create query to delete table
             } else {
-                $delete = 'DELETE FROM ' . $table . ' WHERE ' . $where; // Create query to delete rows
+                $delete = 'DELETE FROM ' . $table . ' WHERE ' . $where . ';'; // Create query to delete rows
             }
 
             try {
-                $query_result = $this->conn->query($delete)->fetch();
+                // i don't now how did this better, write id of result
+                $sth = $this->conn->prepare(
+                    'SELECT id FROM ' . $table . ' WHERE ' . $where . ';'
+                );
+                $sth->execute();
+                $query_result = $sth->fetchAll(PDO::FETCH_ASSOC);
+                $arr_result = [];
+                for ($i = 0; $i < count($query_result); $i++) {
+                    array_push($arr_result, $query_result[$i]['id']);
+                }
+                $sth = $this->conn->prepare($delete);
+                $sth->execute();
+                // $query_result = $sth->fetchAll(PDO::FETCH_ASSOC);
                 $this->myQuery = $delete; // Pass back the SQL
-                return true; // The query exectued correctly
             } catch (Exception $e) {
                 $this->result = [];
                 $this->numResults = 0;
                 return false; // No rows where returned
             }
-            // Submit query to database
+            $this->numResults = count($query_result);
+            // $this->result = $query_result;
+            $this->result = $arr_result;
+            return true; // The query exectued correctly
         } else {
             return false; // The table does not exist
         }
@@ -227,7 +240,7 @@ class Database
             $args = [];
             foreach ($params as $field => $value) {
                 // Seperate each column out with it's corresponding value
-                $args[] = $field . '="' . $value . '"';
+                $args[] = $field . '=?';
             }
             // Create the query
             $sql =
@@ -241,14 +254,28 @@ class Database
             $this->myQuery = $sql; // Pass back the SQL
 
             try {
-                $query_result = $this->conn->query($sql)->fetch();
+
+                // i don't now how did this better, write id of result
+                $sth = $this->conn->prepare(
+                    'SELECT id FROM ' . $table . ' WHERE ' . $where . ';'
+                );
+                $sth->execute();
+                $query_result = $sth->fetchAll(PDO::FETCH_ASSOC);
+                $arr_result = [];
+                for ($i = 0; $i < count($query_result); $i++) {
+                    array_push($arr_result, $query_result[$i]['id']);
+                }
+                $sth = $this->conn->prepare($sql);
+                $sth->execute(array_values($params));
                 $this->myQuery = $sql; // Pass back the SQL
-                return true; // The query exectued correctly
             } catch (Exception $e) {
                 $this->result = [];
                 $this->numResults = 0;
                 return false; // No rows where returned
             }
+            $this->numResults = count($arr_result);
+            $this->result = $arr_result;
+            return true;
         } else {
             return false; // The table does not exist
         }
@@ -273,25 +300,28 @@ class Database
     // Public function to return the data to the user
     public function getResult()
     {
-        $val = $this->result;
-        $this->result = [];
-        return $val;
+        // $val = $this->result;
+        // $this->result = [];
+        // return $val;
+        return $this->result;
     }
 
     //Pass the SQL back for debugging
     public function getSql()
     {
-        $val = $this->myQuery;
-        $this->myQuery = [];
-        return $val;
+        // $val = $this->myQuery;
+        // $this->myQuery = '';
+        // return $val;
+        return $this->myQuery;
     }
 
     //Pass the number of rows back
     public function numRows()
     {
-        $val = $this->numResults;
-        $this->numResults = 0;
-        return $val;
+        // $val = $this->numResults;
+        // $this->numResults = 0;
+        // return $val;
+        return $this->numResults;
     }
 }
 ?>
