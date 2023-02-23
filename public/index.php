@@ -25,7 +25,7 @@ $db->update('users',array('email'=>"name@email.com",'passwd'=>"com"),'id="83"');
 // echo DB_HOST;
 ?>
 <div class="w3-panel">
-    <p>This is a blog project.</p>
+    <p>Blog project.</p>
 </div>
 <?php
 $db = new Database();
