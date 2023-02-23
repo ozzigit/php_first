@@ -3,17 +3,30 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/header.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
 if (isset($_POST['submit'])) {
-    $title = mysqli_real_escape_string($dbcon, $_POST['title']);
-    $description = mysqli_real_escape_string($dbcon, $_POST['description']);
-    $slug = slug($title);
-    $date = date('Y-m-d H:i');
-    $posted_by = mysqli_real_escape_string($dbcon, $_SESSION['username']);
+    $title = $_POST['title'];
+    $content = $_POST['content'];
 
-    $sql = "INSERT INTO posts (title, description, slug,posted_by, date) VALUES('$title', '$description', '$slug', '$posted_by', '$date')";
-    mysqli_query($dbcon, $sql) or
+    // $slug = slug($title);
+    $slug = null;
+
+    $author = $_SESSION['email'];
+
+    $db = new Database();
+    $db->insert('posts', [
+        'title' => $title,
+        'content' => $content,
+        'author' => $author,
+    ]);
+
+    $id = array_values($db->getResult())[0];
+    if ($db->numRows() == 0) {
         die('failed to post' . mysqli_connect_error());
-
-    $permalink = 'p/' . mysqli_insert_id($dbcon) . '/' . $slug;
+    }
+    if (!is_null($slug)) {
+        $permalink = 'p/' . $id . '/' . $slug;
+    } else {
+        $permalink = '/pages/view_post.php?id=' . $id;
+    }
 
     printf(
         "Posted successfully. <meta http-equiv='refresh' content='2; url=%s'/>",
@@ -36,7 +49,7 @@ if (isset($_POST['submit'])) {
 
                 <p>
                     <label>Description</label>
-                    <textarea id = "description" row="30" cols="50" class="w3-input w3-border" name="description" required/></textarea>
+                    <textarea id = "description" row="30" cols="50" class="w3-input w3-border" name="content" required/></textarea>
                 </p>
                 <p>
                     <input type="submit" class="w3-btn w3-teal w3-round" name="submit" value="Post">
@@ -45,7 +58,7 @@ if (isset($_POST['submit'])) {
 
         </div>
     </div>
+
     <?php
 }
-
 include $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/footer.php';
