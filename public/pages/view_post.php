@@ -1,7 +1,6 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/header.php';
-session_start();
 $id = (int) $_GET['id'];
 if ($id < 1) {
     header("location: $url_path");

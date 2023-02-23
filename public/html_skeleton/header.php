@@ -1,6 +1,6 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/config.php';
-
+require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
 if (!empty(SITE_ROOT)) {
     $url_path = '/' . SITE_ROOT . '/';
 } else {
@@ -29,7 +29,8 @@ if (!empty(SITE_ROOT)) {
     <?php if (isset($_SESSION['email'])) {
         echo "<a href='" .
             $url_path .
-            "new.php' class='w3-bar-item w3-btn'>New Post</a>";
+            'pages/' .
+            "new_post.php' class='w3-bar-item w3-btn'>New Post</a>";
         /*
         echo "<a href='" .
             $url_path .
@@ -46,14 +47,6 @@ if (!empty(SITE_ROOT)) {
             "login.php' class='w3-bar-item w3-pale-red' >Login</a>";
     } ?>
 </div>
-
-<div class="w3-container">
-    <form action="<?= $url_path ?>search.php" method="GET" class="w3-container">
-        <p>
-            <input type="text" name="q" class="w3-input w3-border" placeholder="Search for anything" required>
-        </p>
-        <p>
-        <input type="submit" class="w3-btn w3-teal w3-round" value="Search">
-        </p>
-    </form>
-</div>
+<?php if ($_SERVER['REQUEST_URI'] == '/') {
+    include $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/search_container.php';
+}

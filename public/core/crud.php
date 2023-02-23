@@ -123,19 +123,22 @@ class Database
         // array_push($params, $join);
         // }
         if ($where != null) {
-            $arr_of_symb = ['=', '>', '<', '>=', '<=', '<>'];
+            $arr_of_symb = ['=', '>', '<', '>=', '<=', '<>', 'LIKE'];
             foreach ($arr_of_symb as $symb) {
                 $where = str_replace($symb, ' ' . $symb . ' ', $where);
             }
+            $where = preg_replace('/\s+/', ' ', $where);
             $arr_where = explode(' ', $where);
-            foreach ($arr_where as $where_param) {
-                if (in_array($where_param, $arr_of_symb)) {
-                    $param_fom_where =
-                        $arr_where[array_search($where_param, $arr_where) + 1];
-
-                    $arr_where[array_search($where_param, $arr_where) + 1] =
-                        '?';
-                    array_push($params, $param_fom_where);
+            for ($i = 0; $i < count($arr_where); $i++) {
+                if (in_array($arr_where[$i], $arr_of_symb)) {
+                    $next_param_fom_where = $arr_where[$i + 1];
+                    if ($arr_where[$i] == 'LIKE') {
+                        $arr_where[$i + 1] = '?';
+                        array_push($params, $next_param_fom_where);
+                    } else {
+                        $arr_where[$i + 1] = '?';
+                        array_push($params, $next_param_fom_where);
+                    }
                 }
             }
             $sql .= ' WHERE ' . implode(' ', $arr_where);

@@ -2,7 +2,6 @@
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/header.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
-session_start();
 echo '<h2 class="w3-container w3-teal">Login</h2>';
 
 if (isset($_POST['log'])) {
@@ -17,7 +16,7 @@ if (isset($_POST['log'])) {
         $row = $result[0];
         if (password_verify($passwd, $row['passwd'])) {
             $_SESSION['email'] = $email;
-            header('location: admin.php');
+            header('location: /');
         } else {
             echo "<div class='w3-panel w3-pale-red w3-display-container'>Incorrect password.</div>";
         }
