@@ -1,3 +1,3 @@
 RewriteEngine On
 # routing with slug in url (костыль но просто попробывать)
-RewriteRule ^p/(.*)$ /pages/view_post.php?id=$1 [QSA,L]
+RewriteRule ^pslug/(.*)$ /pages/view_post.php?id=$1 [QSA,L]

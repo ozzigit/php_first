@@ -31,20 +31,20 @@ if (!empty(SITE_ROOT)) {
             $url_path .
             'pages/' .
             "new_post.php' class='w3-bar-item w3-btn'>New Post</a>";
-        /*
-        echo "<a href='" .
-            $url_path .
-            "admin.php' class='w3-bar-item w3-btn'>Admin Panel</a>";
-        */
         echo "<a href='" .
             $url_path .
             'core/' .
             "logout.php' class='w3-bar-item w3-btn'>Logout</a>";
+        echo "<div class='w3-bar-item'> Logged as " . $_SESSION['email'] . '</div>';
     } else {
         echo "<a href='" .
             $url_path .
             'pages/' .
             "login.php' class='w3-bar-item w3-pale-red' >Login</a>";
+        echo "<a href='" .
+            $url_path .
+            'pages/' .
+            "register.php' class='w3-bar-item w3-pale-red' >Register</a>";
     } ?>
 </div>
 <?php if ($_SERVER['REQUEST_URI'] == '/') {

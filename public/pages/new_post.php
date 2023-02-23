@@ -6,7 +6,6 @@ if (isset($_POST['submit'])) {
     $title = $_POST['title'];
     $content = $_POST['content'];
 
-    // $slug = slug($title);
     $slug = null;
 
     $author = $_SESSION['email'];

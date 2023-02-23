@@ -5,8 +5,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
 if (isset($_GET['q'])) {
     $q = $_GET['q'];
     $db = new Database();
-    // $sql = "SELECT * FROM posts WHERE title LIKE '%{$q}%' OR content LIKE '%{$q}%'";
-    // $db->sql($sql);
     $db->select('posts', where: "title LIKE %$q% OR content LIKE %$q%");
     $result = $db->getResult();
     if ($db->numRows() < 1) {
@@ -21,7 +19,7 @@ if (isset($_GET['q'])) {
             if (is_null($row['slug'])) {
                 $slug = null;
             } else {
-                $img = htmlentities($row['slug']);
+                $slug = htmlentities($row['slug']);
             }
             if (is_null($row['img'])) {
                 $img = null;

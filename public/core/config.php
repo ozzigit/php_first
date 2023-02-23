@@ -17,3 +17,6 @@ if (!defined('DB_PASS')) {
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'php_base'); // Change as required
 }
+if (!defined('PASSWD_MIN_LEN')) {
+    define('PASSWD_MIN_LEN', 4); // Change as required
+}

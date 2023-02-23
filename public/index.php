@@ -55,6 +55,7 @@ if ($db->numRows() < 1) {
         $id = htmlentities($row['id']);
         $title = htmlentities($row['title']);
         $content = htmlentities($row['content']);
+        $author = htmlentities($row['author']);
 
         if (is_null($row['slug'])) {
             $slug = null;
@@ -70,7 +71,7 @@ if ($db->numRows() < 1) {
         $updated_at = htmlentities($row['updated_at']);
         // if shug is null rout to id of post
         if (!is_null($slug)) {
-            $permalink = 'p/' . $id . '/' . $slug;
+            $permalink = 'pslug/' . $id . '/' . $slug;
         } else {
             $permalink = '/pages/view_post.php?id=' . $id;
         }
@@ -83,6 +84,8 @@ if ($db->numRows() < 1) {
         echo "<a href='$permalink'>Read more...</a></p>";
 
         echo '</div>';
+
+        echo "<div class='w3-text-grey'>Posted by $author </div>";
         echo "<div class='w3-text-grey'>Created at $created_at </div>";
         echo "<div class='w3-text-grey'>Updated at $updated_at </div>";
         echo '</div>';

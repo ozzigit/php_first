@@ -20,11 +20,13 @@ $row = $result[0];
 $id = $row['id'];
 $title = $row['title'];
 $content = $row['content'];
-$slug = $row['slug'];
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// $slug = $row['slug'];
+$slug = NULL;
 
 // if shug is null rout to id of post
 if (!is_null($slug)) {
-    $permalink = 'p/' . $id . '/' . $slug;
+    $permalink = 'pslug/' . $id . '/' . $slug;
 } else {
     $permalink = '/pages/view_post.php?id=' . $id;
 }
