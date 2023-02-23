@@ -1,10 +1,12 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/core/config.php';
+session_start();
 class Database
 {
-    private $db_host = 'first_php_db'; // Change as required
-    private $db_user = 'docker'; // Change as required
-    private $db_pass = 'secret'; // Change as required
-    private $db_name = 'php_base'; // Change as required
+    private $db_host = DB_HOST; // Change as required
+    private $db_user = DB_USER; // Change as required
+    private $db_pass = DB_PASS; // Change as required
+    private $db_name = DB_NAME; // Change as required
 
     private $flag_is_connect = false; // Check to see if the connection is active
     private $conn; //connection itself
@@ -20,19 +22,23 @@ class Database
         $table_posts = 'posts';
 
         $create_users_table_query = "CREATE TABLE $table_users (
-            id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(50) NOT NULL,
-            passwd VARCHAR(30) NOT NULL,
+            id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(150) NOT NULL,
+            passwd VARCHAR(150) NOT NULL,
             -- CONSTRAINT UC_Person UNIQUE (email,passwd)
             UNIQUE (email)
-        );";
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 
         $create_posts_table_query = "CREATE TABLE $table_posts (
             id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            title VARCHAR(50),
+            title VARCHAR(50) NOT NULL,
             content VARCHAR(250) NOT NULL,
-            img BLOB
-        );";
+            author VARCHAR(255) NOT NULL DEFAULT 'unknown',
+            slug VARCHAR(255) DEFAULT NULL,
+            img BLOB,
+            created_at timestamp NOT NULL DEFAULT current_timestamp(),
+            updated_at timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 
         try {
             //check connection
@@ -70,9 +76,9 @@ class Database
             }
 
             $this->flag_is_connect = true;
-            return true; // Connection has been made return TRUE
         } catch (PDOException $e) {
             echo "<script>console.log('Connection failed' );</script>";
+            return false;
         }
     }
 
@@ -103,30 +109,50 @@ class Database
     public function select(
         $table,
         $rows = '*',
-        $join = null,
+        // $join = null,
         $where = null,
         $order = null,
-        $limit = null
+        $limit = null,
+        $offset = null
     ) {
         // Create query from the variables passed to the function
         $params = [];
         $sql = 'SELECT ' . $rows . ' FROM ' . $table;
-        if ($join != null) {
-            $q .= ' JOIN ?';
-            array_push($params, $join);
-        }
+        // if ($join != null) {
+        // $sql .= ' JOIN ?';
+        // array_push($params, $join);
+        // }
         if ($where != null) {
-            $q .= ' WHERE ?';
-            array_push($params, $where);
+            $arr_of_symb = ['=', '>', '<', '>=', '<=', '<>'];
+            foreach ($arr_of_symb as $symb) {
+                $where = str_replace($symb, ' ' . $symb . ' ', $where);
+            }
+            $arr_where = explode(' ', $where);
+            foreach ($arr_where as $where_param) {
+                if (in_array($where_param, $arr_of_symb)) {
+                    $param_fom_where =
+                        $arr_where[array_search($where_param, $arr_where) + 1];
+
+                    $arr_where[array_search($where_param, $arr_where) + 1] =
+                        '?';
+                    array_push($params, $param_fom_where);
+                }
+            }
+            $sql .= ' WHERE ' . implode(' ', $arr_where);
         }
         if ($order != null) {
-            $q .= ' ORDER BY ?';
+            $sql .= ' ORDER BY ?';
             array_push($params, $order);
         }
         if ($limit != null) {
-            $q .= ' LIMIT ?';
+            $sql .= ' LIMIT ?';
             array_push($params, $limit);
         }
+        if ($offset != null) {
+            $sql .= ' OFFSET ?';
+            array_push($params, $offset);
+        }
+        $sql .= ';';
         $this->myQuery = $sql; // Pass back the SQL
         // Check to see if the table exists
         if ($this->tableExists($table)) {
@@ -140,7 +166,6 @@ class Database
                 $this->numResults = 0;
                 return false; // No rows where returned
             }
-
             $this->numResults = count($query_result);
             $this->result = $query_result;
             return true; // Query was successful
@@ -168,7 +193,7 @@ class Database
             try {
                 $sth = $this->conn->prepare($sql);
                 $sth->execute(array_values($params));
-                // $query_result = $sth->fetch(PDO::FETCH_ASSOC);
+                $sth->fetch(PDO::FETCH_ASSOC);
                 $sth = $this->conn->prepare('SELECT LAST_INSERT_ID();');
                 $sth->execute();
                 // i don't now how did this better, write id of result
@@ -211,7 +236,7 @@ class Database
                 }
                 $sth = $this->conn->prepare($delete);
                 $sth->execute();
-                // $query_result = $sth->fetchAll(PDO::FETCH_ASSOC);
+                $sth->fetchAll(PDO::FETCH_ASSOC);
                 $this->myQuery = $delete; // Pass back the SQL
             } catch (Exception $e) {
                 $this->result = [];
@@ -254,7 +279,6 @@ class Database
             $this->myQuery = $sql; // Pass back the SQL
 
             try {
-
                 // i don't now how did this better, write id of result
                 $sth = $this->conn->prepare(
                     'SELECT id FROM ' . $table . ' WHERE ' . $where . ';'
@@ -267,6 +291,7 @@ class Database
                 }
                 $sth = $this->conn->prepare($sql);
                 $sth->execute(array_values($params));
+                $sth->fetchAll(PDO::FETCH_ASSOC);
                 $this->myQuery = $sql; // Pass back the SQL
             } catch (Exception $e) {
                 $this->result = [];
@@ -274,6 +299,7 @@ class Database
                 return false; // No rows where returned
             }
             $this->numResults = count($arr_result);
+            // $this->result = $query_result;
             $this->result = $arr_result;
             return true;
         } else {
