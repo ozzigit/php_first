@@ -59,7 +59,7 @@ if ($db->numRows() < 1) {
         if (is_null($row['slug'])) {
             $slug = null;
         } else {
-            $img = htmlentities($row['slug']);
+            $slug = htmlentities($row['slug']);
         }
         if (is_null($row['img'])) {
             $img = null;

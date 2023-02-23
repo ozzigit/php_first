@@ -3,6 +3,7 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/header.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/security.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/core/functions.php';
 
 $id = (int) $_GET['id'];
 if ($id < 1) {
@@ -32,8 +33,7 @@ if (isset($_POST['update'])) {
     $id = $_POST['id'];
     $title = $_POST['title'];
     $content = $_POST['content'];
-    // $slug = slug($_POST['slug']);
-    $slug = null;
+    $slug = generate_slug($_POST['slug']);
 
     $db->update(
         'posts',

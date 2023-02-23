@@ -7,11 +7,10 @@ if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $db = new Database();
     $db->delete('posts', where: "id=$id");
-    // $sql = "DELETE FROM posts WHERE id = '$id'";
     $result = $db->getResult();
 
     if ($result) {
-        header('location: index.php');
+        header('location: /');
     } else {
         echo 'Failed to delete.';
     }
