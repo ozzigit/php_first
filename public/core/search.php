@@ -1,21 +1,26 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/header.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
-
+?>
+<div class="container">
+    <div class="panel">
+        <div class="panel-default text-center p-4"><h2>Blog project.</h2></div>
+    </div>
+<?php
 if (isset($_GET['q'])) {
     $q = $_GET['q'];
     $db = new Database();
     $db->select('posts', where: "title LIKE %$q% OR content LIKE %$q%");
     $result = $db->getResult();
     if ($db->numRows() < 1) {
-        echo 'Nothing found.';
+        echo '<div class="alert alert-info" role="alert">Nothing found.</div>';
     } else {
-        echo "<div class='w3-container w3-padding'>Showing results for $q</div>";
+        echo '<div class="alert alert-info" role="alert">Showing results for $q</div>';
         foreach ($db->getResult() as $row) {
             $id = htmlentities($row['id']);
             $title = htmlentities($row['title']);
             $content = htmlentities($row['content']);
-
+            $author = htmlentities($row['author']);
             if (is_null($row['slug'])) {
                 $slug = null;
             } else {
@@ -24,30 +29,37 @@ if (isset($_GET['q'])) {
             if (is_null($row['img'])) {
                 $img = null;
             } else {
-                $img = htmlentities($row['img']);
+                $img = $row['img'];
             }
             $created_at = htmlentities($row['created_at']);
             $updated_at = htmlentities($row['updated_at']);
             // if shug is null rout to id of post
             if (!is_null($slug)) {
-                $permalink = 'p/' . $id . '/' . $slug;
+                $permalink = '/' .'pslug/' . $id . '/' . $slug;
             } else {
                 $permalink = '/pages/view_post.php?id=' . $id;
             }
-            echo '<div class="w3-panel w3-sand w3-card-4">';
-            echo "<h3><a href='$permalink'>$title</a></h3><p>";
+            echo '<div class="card m-2">';
+            echo "<h3 class='card-title text-center'><a class='link-dark text-decoration-none' href='$permalink'>$title</a></h3>";
+            $sub_content = substr($content, 0, 100);
+            echo "<h5 class='card-text ms-3'>$sub_content </h5>";
 
-            echo substr($content, 0, 100);
-
-            echo '<div class="w3-text-teal">';
-            echo "<a href='$permalink'>Read more...</a></p>";
-
+            if (!is_null($img)) {
+                echo '<img src="data:image/jpeg;base64, ' .
+                    base64_encode($img) .
+                    '" class="card-img-top embed-responsive-item" alt="...">';
+            }
+            echo '<div class="card-text ms-3 mb-3">';
+            echo "<a href='$permalink'>Read more...</a>";
             echo '</div>';
-            echo "<div class='w3-text-grey'>Created at $created_at </div>";
-            echo "<div class='w3-text-grey'>Updated at $updated_at </div>";
+
+            echo "<p class='card-text ms-3'>Posted by <strong>$author </strong></p>";
+            echo "<p class='card-text ms-3'>Created at $created_at </p>";
+            echo "<p class='card-text ms-3'>Updated at $updated_at </p>";
             echo '</div>';
         }
     }
 }
 
 include $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/footer.php';
+

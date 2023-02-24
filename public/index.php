@@ -2,32 +2,11 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/header.php';
-
-// $db = new Database();
-/*  
-$db->sql('SELECT * FROM users');
-$db->sql("insert into users (email, passwd) values('ozi@ukr.net','password');");
-$db->select('users');
-$db->insert('users',array('email'=>'Nam','passwd'=>'pppppssssss'));
-$db->delete('users','id=11');
-$db->sql( 'SELECT * FROM users');
-$db->sql( 'DESCRIBE users');
-$db->update('users', ['email' => 'name4@email.com'], 'id=8');
-$db->update('users',array('email'=>"name@email.com",'passwd'=>"com"),'id="83"');
-*/
-
-// $db->insert('users', ['email' => 'Na', 'passwd' => 'pppppssssss']);
-// $res = $db->getResult();
-// echo $db->numRows() . '<br/>';
-
-// foreach ($res as $output) {
-// echo json_encode($output) . '<br/>';
-// }
-// echo DB_HOST;
 ?>
-<div class="w3-panel">
-    <p>Blog project.</p>
-</div>
+<div class="container">
+    <div class="panel">
+        <div class="panel-default text-center p-4"><h2>Blog project.</h2></div>
+    </div>
 <?php
 $db = new Database();
 $db->select('posts');
@@ -39,22 +18,19 @@ $page = 1;
 if (isset($_GET['page']) && is_numeric($_GET['page'])) {
     $page = (int) $_GET['page'];
 }
-
 if ($page > $totalpages) {
     $page = $totalpages;
 }
-
 if ($page < 1) {
     $page = 1;
 }
 $offset = ($page - 1) * $rowsperpage;
 $db->select('posts', order: 'id', limit: $rowsperpage, offset: $offset);
 if ($db->numRows() < 1) {
-    echo '<div class="w3-panel w3-pale-red w3-card-2 w3-border w3-round">No post yet!</div>';
+    echo '<div class="alert alert-info" role="alert">No post yet!</div>';
 } else {
     $arr_results = $db->getResult();
     for ($i = 0; $i < count($arr_results); $i++) {
-        // foreach ($db->getResult() as $row) {
         $row = $arr_results[$i];
         $id = htmlentities($row['id']);
         $title = htmlentities($row['title']);
@@ -79,48 +55,73 @@ if ($db->numRows() < 1) {
         } else {
             $permalink = '/pages/view_post.php?id=' . $id;
         }
-        echo '<div class="w3-panel w3-sand w3-card-4">';
-        echo "<h3><a href='$permalink'>$title</a></h3><p>";
 
-        echo substr($content, 0, 100);
+        echo '<div class="card m-2">';
+        echo "<h3 class='card-title text-center'><a class='link-dark text-decoration-none' href='$permalink'>$title</a></h3>";
+        $sub_content = substr($content, 0, 100);
+        echo "<h5 class='card-text ms-3'>$sub_content </h5>";
+
         if (!is_null($img)) {
             echo '<img src="data:image/jpeg;base64, ' .
                 base64_encode($img) .
-                // base64_encode($img->load()) .
-                '" class="card-img-top" alt="...">';
+                '" class="card-img-top embed-responsive-item" alt="...">';
         }
-        echo '<div class="w3-text-teal">';
-        echo "<a href='$permalink'>Read more...</a></p>";
+        echo '<div class="card-text ms-3 mb-3">';
+        echo "<a href='$permalink'>Read more...</a>";
         echo '</div>';
 
-        echo "<div class='w3-text-grey'>Posted by $author </div>";
-        echo "<div class='w3-text-grey'>Created at $created_at </div>";
-        echo "<div class='w3-text-grey'>Updated at $updated_at </div>";
+        echo "<p class='card-text ms-3'>Posted by <strong>$author </strong></p>";
+        echo "<p class='card-text ms-3'>Created at $created_at </p>";
+        echo "<p class='card-text ms-3'>Updated at $updated_at </p>";
+        if (isset($_SESSION['email'])) {
+            echo '<div class="d-flex justify-content-center m-4"> ';
+            echo "<a type='button' class='btn btn-success ms-3' href=" .
+                $url_path .
+                "pages/edit_post.php?id=$id>Edit</a>";
+            echo "<a type='button' class='btn btn-danger ms-3' href=" .
+                $url_path .
+                'core/del_post.php?id=' .
+                $id .
+                " onclick=\"return confirm('Are you sure you want to delete this post?');\">Delete</a>";
+            echo '</div> ';
+        }
         echo '</div>';
     }
-    echo "<p><div class='w3-bar w3-center'>";
-
+    //pagination
+    echo '<nav aria-label="Page navigation">';
+    echo '<ul class="pagination justify-content-center">';
     if ($page > 1) {
-        echo "<a href='?page=1'>&laquo;</a>";
+        echo '<li class="page-item">';
+        echo "<a class='page-link' href='?page=1'>&laquo;</a>";
+        echo '</li>';
         $prevpage = $page - 1;
-        echo "<a href='?page=$prevpage' class='w3-btn'><</a>";
+        echo '<li class="page-item">';
+        echo "<a class='page-link' href='?page=$prevpage'><</a>";
+        echo '</li>';
     }
-    $range = 5;
-    for ($x = $page - $range; $x < $page + $range + 1; $x++) {
+    for ($x = 0; $x <= $totalpages; $x++) {
         if ($x > 0 && $x <= $totalpages) {
-            if ($x == $page) {
-                echo "<div class='w3-teal w3-button'>$x</div>";
-            } else {
-                echo "<a href='?page=$x' class='w3-button w3-border'>$x</a>";
-            }
+            echo '<li class="page-item">';
+            echo "<a class='page-link' href='?page=$x' >$x</a>";
+            echo '</li>';
         }
     }
     if ($page != $totalpages) {
         $nextpage = $page + 1;
-        echo "<a href='?page=$nextpage' class='w3-button'>></a>";
-        echo "<a href='?page=$totalpages' class='w3-btn'>&raquo;</a>";
+        // echo "<a href='?page=$nextpage' class='w3-button'>></a>";
+
+        $nextpage = $page + 1;
+        echo '<li class="page-item">';
+        echo "<a class='page-link' href='?page=$nextpage'>></a>";
+        echo '</li>';
+        echo '<li class="page-item">';
+        echo "<a class='page-link' href='?page=$totalpages' class='w3-btn'> <span aria-hidden='true'>&raquo;</span></a>";
+        echo '</li>';
     }
-    echo '</div></p>';
+
+    echo '</ul>';
+    echo '</nav>';
 }
+echo '</div>';
 include $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/footer.php';
 

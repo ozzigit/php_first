@@ -1,6 +1,6 @@
 <?php
 if (!defined('PAGINATION')) {
-    define('PAGINATION', 10); // Pagination results per page
+    define('PAGINATION', 5); // Pagination results per page
 }
 if (!defined('SITE_ROOT')) {
     define('SITE_ROOT', ''); // If installed on a sub-folder, replace the empty constant with the folder's name

@@ -39,8 +39,8 @@ if (isset($_POST['update'])) {
 
     if (strlen($_POST['slug']) > 0) {
         $slug = generate_slug($_POST['slug']);
-    }else{
-        $slug=NULL;
+    } else {
+        $slug = null;
     }
     if (strlen($_FILES['img']['tmp_name']) > 0) {
         $handler = fopen($_FILES['img']['tmp_name'], 'r');
@@ -48,69 +48,74 @@ if (isset($_POST['update'])) {
     } else {
         $img = null;
     }
-    $db->update(
-        'posts',
-        params: [
-            'title' => $title,
-            'content' => $content,
-            'slug' => $slug,
-            'img' => $img,
-        ],
-        where: "id=$id"
-    );
-
+    if (is_null($img)) {
+        $db->update(
+            'posts',
+            params: [
+                'title' => $title,
+                'content' => $content,
+                'slug' => $slug,
+            ],
+            where: "id=$id"
+        );
+    } else {
+        $db->update(
+            'posts',
+            params: [
+                'title' => $title,
+                'content' => $content,
+                'slug' => $slug,
+                'img' => $img,
+            ],
+            where: "id=$id"
+        );
+    }
     if ($db->numRows() > 0) {
         echo '<meta http-equiv="refresh" content="0">';
     } else {
-        echo 'failed to edit.';
+        echo '<div class="alert alert-info" role="alert">Failed to edit.</div>';
     }
 }
 ?>
 
-    <div class="w3-container">
-    <div class="w3-card-4">
+<div class="container">
+    <div class="card m-2 p-3">
+        <h2 class="fw-bold mb-2 text-center">Edit Post</h2>
+        <h4 class="fw-bold mb-2 text-center"><a class="link-info" href="<?= $permalink ?>">Goto post</a> </h4>
 
-        <div class="w3-container w3-teal">
-            <h2>Edit Post - </h2>
-        </div>
-            <h4 class="w3-container"><a href="<?= $permalink ?>">Goto post</a> </h4>
-
-        <form action="" method="POST" class="w3-container"  enctype="multipart/form-data">
+        <form  method="POST" class="mb-3 mt-md-4"  enctype="multipart/form-data">
             <input type="hidden" name="id" value="<?php echo $id; ?>">
-            <p>
-                <label>Title</label>
-                <input type="text" class="w3-input w3-border" name="title" value="<?php echo $title; ?>">
-            <p>
-            <p>
-                <label>Description</label>
-                <textarea class="w3-input w3-border" id="description" name="content"><?php echo $content; ?> </textarea>
-            </p>
-            <?php if ($img != null) {
-                echo '<p>';
-                echo '<img src="data:image/jpeg;base64, ' .
-                    base64_encode($img) .
-                    '" class="card-img-top" alt="...">';
-                echo '</p>';
-            } ?>
+            <div class="mb-3">
+                <label class='form-label'>Title</label>
+                <input type="text" class="form-control" name="title" value="<?php echo $title; ?>" required>
+            </div>
 
-            <p>
-                <input type="file" name="img" id="img" accept="image/jpeg">
-            </p>
-            <p>
-                <label>Slug (SEO URL)</label>
-                <input type="text" class="w3-input w3-border" name="slug" value="<?php echo $slug; ?>">
-            </p>
-            <p>
-                <input type="submit" class="w3-btn w3-teal w3-round" name="update" value="Save post">
-            </p>
+            <div class="mb-3">
+                <label  class='form-label'>Description</label>
+                <textarea id = "description" rows="15"  class="form-control" name="content" required><?php echo $content; ?></textarea>
+            </div>
+            <div class="mb-3">
+                <?php if ($img != null) {
+                    echo '<img src="data:image/jpeg;base64, ' .
+                        base64_encode($img) .
+                        '" class="card-img-top" alt="...">';
+                } ?>
+                <label  class='form-label'>Plesase choose jpeg file to upload</label>
+                <input type="file" class='form-control' name="img" id="img" accept="image/jpeg">
+            </div>
 
-            <p>
-            <div class="w3-text-red">
-                <a href="<?= $url_path ?>/core/del_post.php?id=<?php echo $id; ?>"
+            <div class="mb-3">
+                <label class='form-label'>Slug (SEO URL)</label>
+                <input type="text" class="form-control" name="slug" value="<?php echo $slug; ?>">
+            </div>
+
+            <div class="mb-3">
+                <input type="submit" class='btn btn-success ms-3' name="update" value="Save post">
+                <a type="button" class="btn btn-danger ms-3" href="<?= $url_path ?>/core/del_post.php?id=<?php echo $id; ?>"
                    onclick="return confirm('Are you sure you want to delete this post?'); ">Delete Post</a></div>
-            </p>
+            </div>
         </form>
     </div>
-    </div>
+</div>
 
 <?php include $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/footer.php';

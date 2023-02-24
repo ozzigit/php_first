@@ -26,45 +26,42 @@ if (isset($_POST['submit'])) {
         die('failed to post');
     }
     $id = array_values($db->getResult())[0];
-    if ((strlen($slug) > 0)) {
+    if (strlen($slug) > 0) {
         $permalink = '/' . 'pslug/' . $id . '/' . $slug;
     } else {
         $permalink = '/pages/view_post.php?id=' . $id;
     }
 
     printf(
-        "Posted successfully. <meta http-equiv='refresh' content='2; url=%s'/>",
+        "<div class='container alert alert-info' >Posted successfully. 
+        <meta http-equiv='refresh' content='2; url=%s'/></div>",
         $permalink
     );
 } else {
      ?>
-    <div class="w3-container">
-        <div class="w3-card-4">
-            <div class="w3-container w3-teal">
-                <h2>New Post</h2>
-            </div>
-
-            <form class="w3-container" method="POST" enctype="multipart/form-data">
-
-                <p>
-                    <label>Title</label>
-                    <input type="text" class="w3-input w3-border" name="title" required>
-                </p>
-
-                <p>
-                    <label>Description</label>
-                    <textarea id = "description" row="30" cols="50" class="w3-input w3-border" name="content" required/></textarea>
-                </p>
-                <p>
-                    <input type="file" name="img" id="img" accept="image/jpeg">
-                </p>
-                <p>
-                    <label>Slug (SEO URL)</label>
-                    <input type="text" class="w3-input w3-border" name="slug" value="">
-                </p>
-                <p>
-                    <input type="submit" class="w3-btn w3-teal w3-round" name="submit" value="Post">
-                </p>
+    <div class="container">
+        <div class="card m-2 p-3">
+            <h2 class='fw-bold mb-2 text-center'>New Post</h2>
+            <form class="mb-3 mt-md-4" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class='form-label'>Title</label>
+                    <input type="text" class="form-control" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label  class='form-label'>Description</label>
+                    <textarea id = "description" rows="15"  class="form-control" name="content" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label  class='form-label'>Plesase choose jpeg file to upload</label>
+                    <input type="file" class='form-control' name="img" id="img" accept="image/jpeg">
+                </div>
+                <div class="mb-3">
+                    <label class='form-label'>Slug (SEO URL)</label>
+                    <input type="text" class="form-control" name="slug" value="">
+                </div>
+                <div class="mb-3">
+                    <input type="submit" class='btn btn-success ms-3' name="submit" value="Post">
+                </div>
             </form>
 
         </div>
