@@ -2,6 +2,7 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/crud.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/header.php';
+
 // $db = new Database();
 /*  
 $db->sql('SELECT * FROM users');
@@ -51,7 +52,10 @@ $db->select('posts', order: 'id', limit: $rowsperpage, offset: $offset);
 if ($db->numRows() < 1) {
     echo '<div class="w3-panel w3-pale-red w3-card-2 w3-border w3-round">No post yet!</div>';
 } else {
-    foreach ($db->getResult() as $row) {
+    $arr_results = $db->getResult();
+    for ($i = 0; $i < count($arr_results); $i++) {
+        // foreach ($db->getResult() as $row) {
+        $row = $arr_results[$i];
         $id = htmlentities($row['id']);
         $title = htmlentities($row['title']);
         $content = htmlentities($row['content']);
@@ -65,13 +69,13 @@ if ($db->numRows() < 1) {
         if (is_null($row['img'])) {
             $img = null;
         } else {
-            $img = htmlentities($row['img']);
+            $img = $row['img'];
         }
         $created_at = htmlentities($row['created_at']);
         $updated_at = htmlentities($row['updated_at']);
         // if shug is null rout to id of post
         if (!is_null($slug)) {
-            $permalink = 'pslug/' . $id . '/' . $slug;
+            $permalink = '/' . 'pslug/' . $id . '/' . $slug;
         } else {
             $permalink = '/pages/view_post.php?id=' . $id;
         }
@@ -79,10 +83,14 @@ if ($db->numRows() < 1) {
         echo "<h3><a href='$permalink'>$title</a></h3><p>";
 
         echo substr($content, 0, 100);
-
+        if (!is_null($img)) {
+            echo '<img src="data:image/jpeg;base64, ' .
+                base64_encode($img) .
+                // base64_encode($img->load()) .
+                '" class="card-img-top" alt="...">';
+        }
         echo '<div class="w3-text-teal">';
         echo "<a href='$permalink'>Read more...</a></p>";
-
         echo '</div>';
 
         echo "<div class='w3-text-grey'>Posted by $author </div>";

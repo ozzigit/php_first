@@ -20,29 +20,41 @@ $row = $result[0];
 $id = $row['id'];
 $title = $row['title'];
 $content = $row['content'];
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// $slug = $row['slug'];
-$slug = NULL;
 
-// if shug is null rout to id of post
+if (is_null($row['img'])) {
+    $img = null;
+} else {
+    $img = $row['img'];
+}
+$slug = $row['slug'];
 if (!is_null($slug)) {
-    $permalink = 'pslug/' . $id . '/' . $slug;
+    $permalink = '/' . 'pslug/' . $id . '/' . $slug;
 } else {
     $permalink = '/pages/view_post.php?id=' . $id;
 }
-
 if (isset($_POST['update'])) {
     $id = $_POST['id'];
     $title = $_POST['title'];
     $content = $_POST['content'];
-    $slug = generate_slug($_POST['slug']);
 
+    if (strlen($_POST['slug']) > 0) {
+        $slug = generate_slug($_POST['slug']);
+    }else{
+        $slug=NULL;
+    }
+    if (strlen($_FILES['img']['tmp_name']) > 0) {
+        $handler = fopen($_FILES['img']['tmp_name'], 'r');
+        $img = fread($handler, filesize($_FILES['img']['tmp_name']));
+    } else {
+        $img = null;
+    }
     $db->update(
         'posts',
         params: [
             'title' => $title,
             'content' => $content,
             'slug' => $slug,
+            'img' => $img,
         ],
         where: "id=$id"
     );
@@ -63,7 +75,7 @@ if (isset($_POST['update'])) {
         </div>
             <h4 class="w3-container"><a href="<?= $permalink ?>">Goto post</a> </h4>
 
-        <form action="" method="POST" class="w3-container">
+        <form action="" method="POST" class="w3-container"  enctype="multipart/form-data">
             <input type="hidden" name="id" value="<?php echo $id; ?>">
             <p>
                 <label>Title</label>
@@ -72,6 +84,17 @@ if (isset($_POST['update'])) {
             <p>
                 <label>Description</label>
                 <textarea class="w3-input w3-border" id="description" name="content"><?php echo $content; ?> </textarea>
+            </p>
+            <?php if ($img != null) {
+                echo '<p>';
+                echo '<img src="data:image/jpeg;base64, ' .
+                    base64_encode($img) .
+                    '" class="card-img-top" alt="...">';
+                echo '</p>';
+            } ?>
+
+            <p>
+                <input type="file" name="img" id="img" accept="image/jpeg">
             </p>
             <p>
                 <label>Slug (SEO URL)</label>

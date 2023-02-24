@@ -20,6 +20,12 @@ $id = $result['id'];
 $title = $result['title'];
 $content = $result['content'];
 $author = $result['author'];
+if (is_null($result['img'])) {
+    $img = null;
+} else {
+    $img = $result['img'];
+}
+$slug = $result['slug'];
 $created_at = $result['created_at'];
 $updated_at = $result['updated_at'];
 
@@ -28,6 +34,12 @@ echo '<div class="w3-container w3-sand w3-card-4">';
 echo "<h3>$title</h3>";
 echo '<div class="w3-panel w3-leftbar w3-rightbar w3-border w3-sand w3-card-4">';
 echo "$content<br>";
+
+if (!is_null($img)) {
+    echo '<img src="data:image/jpeg;base64, ' .
+        base64_encode($img) .
+        '" class="card-img-top" alt="...">';
+}
 echo '<div class="w3-text-grey">';
 echo 'Posted by: ' . $author . '<br>';
 echo "Created at $created_at<br>";

@@ -32,9 +32,9 @@ if (isset($_POST['log'])) {
             isset($_POST['email'])
         ) {
             echo strip_tags($_POST['email']);
-        } ?>" class="w3-input w3-border">
+        } ?>" class="w3-input w3-border" required>
         <label>Password</label>
-        <input type="password" name="passwd" class="w3-input w3-border">
+        <input type="password" name="passwd" class="w3-input w3-border" required>
         <p><input type="submit" name="log" value="Login" class="w3-btn w3-teal"></p>
     </form>
 

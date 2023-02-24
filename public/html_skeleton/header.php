@@ -16,7 +16,6 @@ if (!empty(SITE_ROOT)) {
 
     <link rel="stylesheet" type="text/css" href="https://www.w3schools.com/w3css/4/w3.css">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.19.1/ui/trumbowyg.min.css">
 </head>
 <body>
 

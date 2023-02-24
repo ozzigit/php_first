@@ -35,7 +35,7 @@ class Database
             content VARCHAR(250) NOT NULL,
             author VARCHAR(255) NOT NULL DEFAULT 'unknown',
             slug VARCHAR(255) DEFAULT NULL,
-            img BLOB,
+            img LONGBLOB,
             created_at timestamp NOT NULL DEFAULT current_timestamp(),
             updated_at timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
         ) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
@@ -220,7 +220,7 @@ class Database
         // Check to see if table exists
         if ($this->tableExists($table)) {
             // The table exists check to see if we are deleting rows or table
-            if ($where == null) {
+            if (is_null($where)) {
                 // $delete = 'DROP TABLE ' . $table; // Create query to delete table
             } else {
                 $delete = 'DELETE FROM ' . $table . ' WHERE ' . $where . ';'; // Create query to delete rows
