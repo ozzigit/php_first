@@ -1,4 +1,5 @@
 <?php
+/*
 if (!defined('PAGINATION')) {
     define('PAGINATION', 5); // Pagination results per page
 }
@@ -20,3 +21,11 @@ if (!defined('DB_NAME')) {
 if (!defined('PASSWD_MIN_LEN')) {
     define('PASSWD_MIN_LEN', 4); // Change as required
 }
+*/
+define('PAGINATION', 5); // Pagination results per page
+define('SITE_ROOT', ''); // If installed on a sub-folder, replace the empty constant with the folder's name
+define('DB_HOST', 'first_php_db'); // Change as required
+define('DB_USER', 'docker'); // Change as required
+define('DB_PASS', 'secret'); // Change as required
+define('DB_NAME', 'php_base'); // Change as required
+define('PASSWD_MIN_LEN', 4); // Change as required

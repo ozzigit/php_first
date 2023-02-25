@@ -74,16 +74,18 @@ if ($db->numRows() < 1) {
         echo "<p class='card-text ms-3'>Created at $created_at </p>";
         echo "<p class='card-text ms-3'>Updated at $updated_at </p>";
         if (isset($_SESSION['email'])) {
-            echo '<div class="d-flex justify-content-center m-4"> ';
-            echo "<a type='button' class='btn btn-success ms-3' href=" .
-                $url_path .
-                "pages/edit_post.php?id=$id>Edit</a>";
-            echo "<a type='button' class='btn btn-danger ms-3' href=" .
-                $url_path .
-                'core/del_post.php?id=' .
-                $id .
-                " onclick=\"return confirm('Are you sure you want to delete this post?');\">Delete</a>";
-            echo '</div> ';
+            if ($_SESSION['email'] == $author) {
+                echo '<div class="d-flex justify-content-center m-4"> ';
+                echo "<a type='button' class='btn btn-success ms-3' href=" .
+                    $url_path .
+                    "pages/edit_post.php?id=$id>Edit</a>";
+                echo "<a type='button' class='btn btn-danger ms-3' href=" .
+                    $url_path .
+                    'core/del_post.php?id=' .
+                    $id .
+                    " onclick=\"return confirm('Are you sure you want to delete this post?');\">Delete</a>";
+                echo '</div> ';
+            }
         }
         echo '</div>';
     }

@@ -52,12 +52,14 @@ if (!is_null($img)) {
 
 
 <?php
-if (isset($_SESSION['email'])) { ?>
+if (isset($_SESSION['email']))  {
+   if ($_SESSION['email']== $author ){?>
+
     <div class="d-flex justify-content-center m-4">
         <a type="button" class="btn btn-success ms-3" href=<?= $url_path ?>pages/edit_post.php?id=<?php echo $id; ?>"> Edit </a>
         <a type="button" class="btn btn-danger ms-3" href=<?= $url_path ?>core/del_post.php?id=<?php echo $id; ?>" onclick="return confirm('Are you sure you want to delete this post?'); ">Delete</a>
     </div>
-    <?php }
+    <?php }}
 echo '</div></div>';
 
 include $_SERVER['DOCUMENT_ROOT'] . '/html_skeleton/footer.php';
